@@ -6,7 +6,7 @@
 ![Snipaste_2023-02-26_16-53-50](https://user-images.githubusercontent.com/16256221/221403701-a972abe4-8ca8-40d6-a867-5732377eaafe.png)
 <details>
 <summary>展开截图</summary>
-<img src="https://user-images.githubusercontent.com/16256221/221403712-b1a8ba4e-c550-4280-bb5f-538ee85726aa.png" height="630"><img src="https://user-images.githubusercontent.com/16256221/221403715-17e0268a-6c13-42b5-aba9-1e77f294ac95.png" height="630">
+<img src="https://user-images.githubusercontent.com/16256221/221403712-b1a8ba4e-c550-4280-bb5f-538ee85726aa.png" height="515"><img src="https://user-images.githubusercontent.com/16256221/221403715-17e0268a-6c13-42b5-aba9-1e77f294ac95.png" height="515">
 </details>
 
 ## 功能
