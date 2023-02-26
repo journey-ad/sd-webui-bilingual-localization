@@ -63,8 +63,8 @@
   // 翻译页面
   function translatePage() {
     // const selector = ['tab_txt2img', 'tab_img2img', 'tab_extras', 'tab_pnginfo'].map(tab => `#${tab} label span, #${tab} button`).join(',')
-    [...querySelectorAll('label span, fieldset span, th span, button, textarea[placeholder], select[title], option, div.transition > div > span:not([class]), .tabitem .pointer-events-none, #lightboxModal span')].forEach(el => translateEl(el));
-    [...querySelectorAll('.output-html p, div[data-testid="image"] > div > div, #extras_image_batch > div')].forEach(el => translateEl(el, 'node'));
+    [...querySelectorAll('label span, fieldset span, th span, button, textarea[placeholder], select[title], option, div.transition > div > span:not([class]), .tabitem .pointer-events-none, #lightboxModal span, thead th, .output-html')].forEach(el => translateEl(el));
+    [...querySelectorAll('.output-html:not(#footer) p, .output-html tabel:not(#extensions), div[data-testid="image"] > div > div, #extras_image_batch > div, .extension-tag')].forEach(el => translateEl(el, 'node'));
   }
 
   // 翻译元素
