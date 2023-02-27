@@ -1,48 +1,49 @@
-<p align="center"><img src="https://count.getloli.com/get/@sd-webui-zh_cn.github" alt="sd-webui-zh_cn"></p>
+[中文文档](README_ZH.md)
 
-# sd-webui-zh_cn
-[Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 双语对照翻译插件
+<p align="center"><img src="https://count.getloli.com/get/@sd-webui-bilingual-localization.github" alt="sd-webui-bilingual-localization"></p>
 
-![Snipaste_2023-02-26_16-53-50](https://user-images.githubusercontent.com/16256221/221403701-a972abe4-8ca8-40d6-a867-5732377eaafe.png)
-<details>
-<summary>展开截图</summary>
-<img src="https://user-images.githubusercontent.com/16256221/221403712-b1a8ba4e-c550-4280-bb5f-538ee85726aa.png" height="515"><img src="https://user-images.githubusercontent.com/16256221/221403715-17e0268a-6c13-42b5-aba9-1e77f294ac95.png" height="515">
-</details>
+# sd-webui-bilingual-localization
+[Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) bilingual localization extensions.
 
-## 功能
-- 全界面双语对照翻译，包括设置界面/ControlNet插件等
-- 支持 prompt 翻译
+![Snipaste_2023-02-28_00-23-45](https://user-images.githubusercontent.com/16256221/221622328-a4e46b1c-f202-4a41-9a56-3df96c823f42.png)
 
-## 安装
+## Features
+- Bilingual translation, no need to worry about how to find the original button.
+- Compatible with language pack extensions, no need to re-import.
 
-以下方式选择其一，需要使用支持扩展功能的 webui <sup>(2023年之后的版本)</sup>
+## Installation
 
-### 方式1
+Choose one of the following methods, Need to use webui with extension support <sup>(Versions after 2023)</sup>
 
-使用 webui 提供的`Install from URL`功能安装
+### Method 1
 
-按下图所示，依次点击<kbd>Extensions</kbd> - <kbd>Install from URL</kbd>
+Use the `Install from URL` provided by webui to install
 
-然后在第一个文本框内填入`https://github.com/journey-ad/sd-webui-zh_cn.git`，点击<kbd>Install</kbd>按钮
+Click in order <kbd>Extensions</kbd> - <kbd>Install from URL</kbd>
 
-![Snipaste_2023-02-26_15-26-11](https://user-images.githubusercontent.com/16256221/221398043-764f6b63-53c2-4700-88c4-e8c73576ded8.png)
+Then fill in the first text box with `https://github.com/journey-ad/sd-webui-bilingual-localization`, click the <kbd>Install</kbd> button.
+![Snipaste_2023-02-28_00-27-48](https://user-images.githubusercontent.com/16256221/221625310-a6ef0b4c-a1e0-46bb-be9c-6d88cd0ad684.png)
 
-之后切换到<kbd>Installed</kbd>面板，点击<kbd>Apply and restart UI</kbd>按钮
-
-![Snipaste_2023-02-26_16-00-39](https://user-images.githubusercontent.com/16256221/221399100-fe6af1d2-f7e2-4abe-bd02-9598db6afaca.png)
+After that, switch to the <kbd>Installed</kbd> panel and click the <kbd>Apply and restart UI</kbd> button.
+![Snipaste_2023-02-28_00-29-14](https://user-images.githubusercontent.com/16256221/221625345-9e656f25-89dd-4361-8ee5-f4ab39d18ca4.png)
 
 
-### 方式2
+### Method 2
 
-手动克隆到你的扩展目录里
+Clone to your extension directory manually.
 
 ```bash
-git clone "https://github.com/journey-ad/sd-webui-zh_cn.git" extensions/sd-webui-zh_cn
+git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensions/sd-webui-bilingual-localization
 ```
 
-或者在扩展目录创建一个名为`sd-webui-zh_cn`的文件夹，下载仓库文件，将 `javascript`和`i18n`文件夹放在其中
+## Usage
 
-## Credits
+> **⚠️Important⚠️**   
+> Make sure <kbd>Settings</kbd> - <kbd>User interface</kbd> - <kbd>Localization</kbd> is set to `None`
 
-[VinsonLaro/stable-diffusion-webui-chinese](https://github.com/VinsonLaro/stable-diffusion-webui-chinese)   
-[dtlnor/stable-diffusion-webui-localization-zh_CN](https://github.com/dtlnor/stable-diffusion-webui-localization-zh_CN)
+In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd> panel, select the localization file you want to enable and click on the <kbd>Apply settings</kbd> and <kbd>Reload UI</kbd> buttons in turn.
+![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## How to get localization file
+
+Localization files are no longer provided with the plugin, please install a third-party language extensions and set it up as described in the [Usage](#usage) section of this article.
