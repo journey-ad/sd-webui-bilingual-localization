@@ -1,26 +1,38 @@
 (function () {
   const customCSS = `
     .bilingual__trans_wrapper {
-      display: flex;
+      display: inline-flex;
       flex-direction: column;
       align-items: center;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 1;
     }
     
     .bilingual__trans_wrapper em {
-      font-size: 12px;
       font-style: normal;
     }
-    
-    .custom_ui__prompt_trans {
-      font-size: 12px;
+
+    #tab_ti .output-html .bilingual__trans_wrapper em,
+    #available_extensions .extension-tag .bilingual__trans_wrapper em {
+      display: none;
     }
     
     #settings .bilingual__trans_wrapper,
     label>span>.bilingual__trans_wrapper,
-    .w-full>span>.bilingual__trans_wrapper {
+    .w-full>span>.bilingual__trans_wrapper,
+    .output-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper) {
+      font-size: 12px;
       align-items: flex-start;
+    }
+
+    #extensions label .bilingual__trans_wrapper,
+    #available_extensions td .bilingual__trans_wrapper {
+      font-size: inherit;
+      line-height: inherit;
+    }
+    
+    #available_extensions .extension-tag {
+      font-size: 85%;
     }
     
     textarea::placeholder {
@@ -40,6 +52,7 @@
 
   let i18n = null, config = null;
 
+  // First load
   function setup() {
     config = {
       enabled: opts["bilingual_localization_enabled"],
@@ -56,53 +69,56 @@
 
     // Load localization file
     i18n = JSON.parse(readFile(dirs[file]))
+
+    translatePage()
   }
 
   // Translate page
   function translatePage() {
     if (!i18n) return
 
-    querySelectorAll(`
-      label span, fieldset span, thead th, th span, button, 
-      textarea[placeholder], select[title], option,
-      .transition > div > span:not([class]),
-      .tabitem .pointer-events-none,
-      .output-html, #lightboxModal span
-    `)
-      .forEach(el => translateEl(el))
+    querySelectorAll([
+      "label span, fieldset span, button", // major label and button description text
+      "textarea[placeholder], select[title], option", // text box placeholder and select element
+      ".transition > div > span:not([class])", // collapse panel added by extension
+      ".tabitem .pointer-events-none", // upper left corner of image upload panel
+      ".output-html:not(#footer)", // output html exclude footer
+      "#lightboxModal span" // image preview lightbox
+    ])
+      .forEach(el => translateEl(el, { deep: true }))
 
-    querySelectorAll(`
-      .output-html:not(#footer) p,
-      .output-html tabel:not(#extensions),
-      div[data-testid="image"] > div > div,
-      #extras_image_batch > div,
-      .extension-tag
-    `)
-      .forEach(el => translateEl(el, true))
+    querySelectorAll([
+      'div[data-testid="image"] > div > div', // description of image upload panel
+      '#extras_image_batch > div', //  description of extras image batch file upload panel
+    ])
+      .forEach(el => translateEl(el, { rich: true }))
   }
 
   // Translate element
-  function translateEl(el, deep) {
+  function translateEl(el, { deep = false, rich = false } = {}) {
+    if (!i18n) return
     if (el.className === 'bilingual__trans_wrapper') return
 
-    if (deep) {
-      Array.from(el.childNodes).forEach(node => {
-        if (node.nodeName === '#text') {
-          doTranslate(node, node.textContent, 'node')
-        } else if (node.childNodes.length > 0) {
-          translateEl(node, true)
-        }
-      })
-      return
+    if (el.tagName === 'OPTION') {
+      doTranslate(el, el.textContent, 'option')
+    } else {
+      doTranslate(el, el.textContent, 'element')
     }
 
-    if (el.textContent && el.tagName !== 'SELECT') {
-      if (el.tagName === 'OPTION') {
-        doTranslate(el, el.textContent, 'option')
-      } else {
-        doTranslate(el, el.textContent, 'element')
+    Array.from(el.childNodes).forEach(node => {
+      if (node.nodeName === '#text') {
+        if (rich) {
+          doTranslate(node, node.textContent, 'text')
+          return
+        }
+
+        if (deep) {
+          doTranslate(node, node.textContent, 'element')
+        }
+      } else if (node.childNodes.length > 0) {
+        translateEl(node, { deep, rich })
       }
-    }
+    })
 
     if (el.title) {
       doTranslate(el, el.title, 'title')
@@ -126,17 +142,19 @@
     }
 
     switch (type) {
-      case 'node':
+      case 'text':
         el.textContent = translation
         break;
 
       case 'element':
-        if (el.childNodes.length === 1 || !el.classList.contains('pointer-events-none')) {
-          el.innerHTML = `<div class="bilingual__trans_wrapper"><em>${translation}</em>${source}</div>`
-        } else {
+        const htmlStr = `<div class="bilingual__trans_wrapper">${htmlEncode(translation)}<em>${htmlEncode(source)}</em></div>`
+        const htmlEl = parseHtmlStringToElement(htmlStr)
+        if (el.hasChildNodes()) {
           const textNode = Array.from(el.childNodes).find(node => node.nodeName === '#text' && node.textContent.trim() === source)
 
-          textNode && (textNode.textContent = `${translation} (${source})`)
+          textNode && textNode.replaceWith(htmlEl)
+        } else {
+          el.replaceWith(htmlEl)
         }
         break;
 
@@ -162,6 +180,17 @@
     return gradioApp()?.querySelectorAll(...args)
   }
 
+  function parseHtmlStringToElement(htmlStr) {
+    const template = document.createElement('template')
+    template.insertAdjacentHTML('afterbegin', htmlStr)
+    return template.firstElementChild
+  }
+
+  function htmlEncode(htmlStr) {
+    return htmlStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+  }
+
   // Load file
   function readFile(filePath) {
     let request = new XMLHttpRequest();
@@ -182,12 +211,21 @@
     gradioApp().appendChild($styleEL);
 
     let loaded = false
-    onUiUpdate(() => {
-      translatePage()
+    onUiUpdate((m) => {
+      if (Object.keys(localization).length) return; // disabled if original translation enabled
+      if (Object.keys(opts).length === 0) return; // does nothing if opts is not loaded
 
-      if (loaded) return
-      if (Object.keys(localization).length) return
-      if (Object.keys(opts).length === 0) return;
+      m.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1 && node.className === 'output-html') {
+            translateEl(node, { rich: true })
+          } else {
+            translateEl(node, { deep: true })
+          }
+        })
+      })
+
+      if (loaded) return;
       if (i18n) return;
 
       loaded = true
