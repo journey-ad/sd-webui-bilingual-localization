@@ -4,7 +4,7 @@
       display: inline-flex;
       flex-direction: column;
       align-items: center;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1;
     }
     
@@ -12,12 +12,20 @@
       font-style: normal;
     }
 
+    fieldset span.text-gray-500:has(.bilingual__trans_wrapper),
+    .gr-block.gr-box span.text-gray-500:has(.bilingual__trans_wrapper),
+    label.block span:has(.bilingual__trans_wrapper) {
+      top: -0.8em;
+      line-height: 1;
+    }
+
+    #txtimg_hr_finalres .bilingual__trans_wrapper em,
     #tab_ti .output-html .bilingual__trans_wrapper em,
     #available_extensions .extension-tag .bilingual__trans_wrapper em {
       display: none;
     }
     
-    #settings .bilingual__trans_wrapper,
+    #settings .bilingual__trans_wrapper:not(#settings .tabitem .bilingual__trans_wrapper),
     label>span>.bilingual__trans_wrapper,
     .w-full>span>.bilingual__trans_wrapper,
     .output-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper) {
@@ -31,14 +39,9 @@
       line-height: inherit;
     }
     
-    #available_extensions .extension-tag {
-      font-size: 85%;
-    }
-    
     textarea::placeholder {
-      font-size: 12px;
       line-height: 1;
-      padding: 5px 0;
+      padding: 4px 0;
     }
     
     label>span {
