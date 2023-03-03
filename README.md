@@ -1,4 +1,4 @@
-[中文文档](README_ZH.md) [日本語](README_JA.md)
+[中文文档](README_ZH.md) / [日本語](README_JA.md)
 
 <p align="center"><img src="https://count.getloli.com/get/@sd-webui-bilingual-localization.github" alt="sd-webui-bilingual-localization"></p>
 
