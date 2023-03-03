@@ -97,10 +97,19 @@
       .forEach(el => translateEl(el, { rich: true }))
   }
 
+  const ignore_selector = [
+    '.bilingual__trans_wrapper', // self
+    '.resultsFlexContainer', // tag-autocomplete
+    '#setting_sd_model_checkpoint select', // model checkpoint
+    '#setting_sd_vae select', // vae model
+    '#txt2img_styles, #img2txt_styles', // styles select
+    '.extra-network-cards .card .actions .name', // extra network cards name
+    'script, style, svg, g, path', // script / style / svg elements
+  ]
   // Translate element
   function translateEl(el, { deep = false, rich = false } = {}) {
-    if (!i18n) return
-    if (el.className === 'bilingual__trans_wrapper') return
+    if (!i18n) return // translation not ready.
+    if (el.matches?.(ignore_selector)) return // ignore some elements.
 
     if (el.tagName === 'OPTION') {
       doTranslate(el, el.textContent, 'option')
@@ -132,9 +141,15 @@
     }
   }
 
+  const re_num = /^[\.\d]+$/,
+    re_emoji = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]/u
+
   function doTranslate(el, source, type) {
+    if (el.__bilingual_localization_translated) return
     source = source.trim()
     if (!source) return
+    if (re_num.test(source)) return
+    if (re_emoji.test(source)) return
 
     let translation = i18n[source]
     if (!translation) return
@@ -173,6 +188,8 @@
         el.placeholder = `${translation}\n\n${source}`
         break;
     }
+
+    Object.defineProperty(el, '__bilingual_localization_translated', { value: true })
   }
 
   function querySelector(...args) {
