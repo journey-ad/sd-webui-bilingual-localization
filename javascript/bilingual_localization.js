@@ -111,6 +111,14 @@
     if (!i18n) return // translation not ready.
     if (el.matches?.(ignore_selector)) return // ignore some elements.
 
+    if (el.title) {
+      doTranslate(el, el.title, 'title')
+    }
+
+    if (el.placeholder) {
+      doTranslate(el, el.placeholder, 'placeholder')
+    }
+
     if (el.tagName === 'OPTION') {
       doTranslate(el, el.textContent, 'option')
     } else {
@@ -131,14 +139,6 @@
         translateEl(node, { deep, rich })
       }
     })
-
-    if (el.title) {
-      doTranslate(el, el.title, 'title')
-    }
-
-    if (el.placeholder) {
-      doTranslate(el, el.placeholder, 'placeholder')
-    }
   }
 
   const re_num = /^[\.\d]+$/,
