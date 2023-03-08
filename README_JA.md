@@ -9,14 +9,16 @@
 
 ## 特徴
 - バイリンガル対応により、元のボタンを探す必要がありません。
-- 言語パックの拡張機能に対応するので、再インストールが不要
+- 言語パックの拡張機能に対応するので、再インストールが不要。
+- 動的なタイトルヒントの翻訳をサポートします。
+- 正規表現パターンによる柔軟な翻訳が可能です。
 
 ## Installation
 
 以下の方法から選択します。
 拡張機能に対応したWebUIが必要です。<sup>(Versions after 2023)</sup>
 
-### Method 1
+#### Method 1
 
 webuiの`Install from URL`でインストール
 
@@ -31,7 +33,7 @@ webuiの`Install from URL`でインストール
 ![Snipaste_2023-02-28_00-29-14](https://user-images.githubusercontent.com/16256221/221625345-9e656f25-89dd-4361-8ee5-f4ab39d18ca4.png)
 
 
-### Method 2
+#### Method 2
 
 手動でExtensionディレクトリにcloneする
 
@@ -47,6 +49,18 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>パネルで、有効にしたい言語を選択し、<kbd>Apply settings</kbd> and <kbd>Reload UI</kbd>をクリック
 
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## RegExp pattern
+
+言語対応の正規表現パターンで、構文ルールは`@@<REGEXP>`、キャプチャグループは`$n`です。ドキュメント：[String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)。
+```json
+{
+  ...
+  "@@/^(\\d+) images in this directory, divided into (\\d+) pages$/": "このディレクトリには$1枚の画像、$2ページ",
+  "@@/^Favorites path from settings: (.*)$/": "お気に入りのディレクトリパス：$1",
+  ...
+}
+```
 
 ## 言語ファイルの取得
 

@@ -10,12 +10,14 @@
 ## 功能
 - 全新实现的双语对照翻译功能，不必再担心切换翻译后找不到原始功能
 - 兼容原生语言包扩展，无需重新导入多语言语料
+- 支持动态title提示的翻译
+- 额外支持正则表达式替换，翻译更加灵活
 
 ## 安装
 
 以下方式选择其一，需要使用支持扩展功能的 webui <sup>(2023年之后的版本)</sup>
 
-### 方式1
+#### 方式1
 
 使用 webui 提供的`Install from URL`功能安装
 
@@ -28,7 +30,7 @@
 ![Snipaste_2023-02-28_00-29-14](https://user-images.githubusercontent.com/16256221/221625345-9e656f25-89dd-4361-8ee5-f4ab39d18ca4.png)
 
 
-### 方式2
+#### 方式2
 
 手动克隆到你的扩展目录里
 
@@ -43,6 +45,18 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 
 在<kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>中选择要启用的本地化文件，依次点击<kbd>Apply settings</kbd>和<kbd>Reload UI</kbd>按钮
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## 正则表达式支持
+
+本地化语料支持正则表达式替换，语法规则`@@<REGEXP>`，括号匹配变量`$n`，参考[String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)
+```json
+{
+  ...
+  "@@/^(\\d+) images in this directory, divided into (\\d+) pages$/": "目录中有$1张图片，共$2页",
+  "@@/^Favorites path from settings: (.*)$/": "设置的收藏夹目录：$1",
+  ...
+}
+```
 
 ## 获取本地化文件
 
