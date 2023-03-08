@@ -17,6 +17,9 @@ def on_ui_settings():
     BL_SECTION = ("bl", "Bilingual Localization")
     # enable in settings
     shared.opts.add_option("bilingual_localization_enabled", shared.OptionInfo(True, "Enable Bilingual Localization", section=BL_SECTION))
+    
+    # enable devtools log
+    shared.opts.add_option("bilingual_localization_logger", shared.OptionInfo(False, "Enable Devtools Log", section=BL_SECTION))
 
     # current localization file
     shared.opts.add_option("bilingual_localization_file", shared.OptionInfo("None", "Localization file (Please leave `User interface` - `Localization` as None)", gr.Dropdown, lambda: {"choices": ["None"] + list(localization.localizations.keys())}, refresh=lambda: localization.list_localizations(shared.cmd_opts.localizations_dir), section=BL_SECTION))
