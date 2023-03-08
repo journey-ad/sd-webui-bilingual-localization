@@ -80,9 +80,10 @@
   function translatePage() {
     if (!i18n) return
 
+    logger.time('Full Page')
     querySelectorAll([
       "label span, fieldset span, button", // major label and button description text
-      "textarea[placeholder], select[title], option", // text box placeholder and select element
+      "textarea[placeholder], select, option", // text box placeholder and select element
       ".transition > div > span:not([class])", // collapse panel added by extension
       ".tabitem .pointer-events-none", // upper left corner of image upload panel
       ".output-html:not(#footer)", // output html exclude footer
@@ -95,6 +96,8 @@
       '#extras_image_batch > div', //  description of extras image batch file upload panel
     ])
       .forEach(el => translateEl(el, { rich: true }))
+
+    logger.timeEnd('Full Page')
   }
 
   const ignore_selector = [
@@ -111,7 +114,7 @@
     if (!i18n) return // translation not ready.
     if (el.matches?.(ignore_selector)) return // ignore some elements.
 
-    if (el.title) {
+    if (el.title || el.tagName === 'SELECT') {
       doTranslate(el, el.title, 'title')
     }
 
@@ -145,8 +148,39 @@
     re_emoji = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]/u
 
   function doTranslate(el, source, type) {
-    if (el.__bilingual_localization_translated) return
     source = source.trim()
+
+    /**
+     * Process the element's title property.
+     * Due to hint.js resetting the title when the UI is updated, some extra work is required here.
+     */
+    if (type === 'title') {
+      const elDescriptor = Object.getOwnPropertyDescriptor(el, 'title')
+      if (elDescriptor && elDescriptor.get) return // already translated
+
+      const title_translation = doTranslate(el, source)
+      let title = title_translation ? `${title_translation}\n${source}` : source
+
+      // set the translation to the element title
+      el.setAttribute('title', title)
+
+      // translate when title is changed
+      Object.defineProperty(el, 'title', {
+        get() {
+          return title
+        },
+        set(value) {
+          const title_translation = doTranslate(el, value)
+          title = title_translation ? `${title_translation}\n${value}` : value
+          this.setAttribute('title', title)
+        }
+      })
+
+      return
+    }
+
+    if (el.__bilingual_localization_translated) return
+
     if (!source) return
     if (re_num.test(source)) return
     if (re_emoji.test(source)) return
@@ -180,14 +214,12 @@
         el.textContent = `${translation} (${source})`
         break;
 
-      case 'title':
-        el.title = `${translation}\n${source}`
-        Object.defineProperty(el, 'title', { writable: false }) // prevent title overwritten by hint.js
-        break;
-
       case 'placeholder':
         el.placeholder = `${translation}\n\n${source}`
         break;
+
+      default:
+        return translation
     }
 
     Object.defineProperty(el, '__bilingual_localization_translated', { value: true })
@@ -220,6 +252,64 @@
     return request.responseText;
   }
 
+  const logger = (function () {
+    const loggerTimerMap = new Map()
+    const loggerConf = { badge: true, label: 'Logger' }
+    return new Proxy(console, {
+      get: (target, propKey) => {
+        if (propKey === 'init') {
+          return (label) => {
+            loggerConf.label = label
+          }
+        }
+
+        if (!(propKey in target)) return undefined
+
+        return (...args) => {
+          let color = ['#39cfe1', '#006cab']
+
+          let label, start
+          switch (propKey) {
+            case 'error':
+              color = ['#f70000', '#a70000']
+              break;
+            case 'warn':
+              color = ['#f7b500', '#b58400']
+              break;
+            case 'time':
+              label = args[0]
+              if (loggerTimerMap.has(label)) {
+                logger.warn(`Timer '${label}' already exisits`)
+              } else {
+                loggerTimerMap.set(label, performance.now())
+              }
+              return
+            case 'timeEnd':
+              label = args[0], start = loggerTimerMap.get(label)
+              if (start === undefined) {
+                logger.warn(`Timer '${label}' does not exist`)
+              } else {
+                loggerTimerMap.delete(label)
+                logger.log(`${label}: ${performance.now() - start} ms`)
+              }
+              return
+            case 'groupEnd':
+              loggerConf.badge = true
+              break
+          }
+
+          const badge = loggerConf.badge ? [`%c${loggerConf.label}`, `color: #fff; background: linear-gradient(180deg, ${color[0]}, ${color[1]}); text-shadow: 0px 0px 1px #0003; padding: 3px 5px; border-radius: 4px;`] : []
+
+          target[propKey](...badge, ...args)
+
+          if (propKey === 'group' || propKey === 'groupCollapsed') {
+            loggerConf.badge = false
+          }
+        }
+      }
+    })
+  }())
+
   function init() {
     // Add style to dom
     let $styleEL = document.createElement('style');
@@ -231,13 +321,22 @@
     }
     gradioApp().appendChild($styleEL);
 
+    logger.init('Bilingual')
+    logger.log('Bilingual Localization initialized.')
+
     let loaded = false
+    let _count = 0
     onUiUpdate((m) => {
       if (Object.keys(localization).length) return; // disabled if original translation enabled
       if (Object.keys(opts).length === 0) return; // does nothing if opts is not loaded
 
+      let _nodesCount = 0, _now = performance.now()
+
       m.forEach(mutation => {
         mutation.addedNodes.forEach(node => {
+          if (node.className === 'bilingual__trans_wrapper') return
+
+          _nodesCount++
           if (node.nodeType === 1 && node.className === 'output-html') {
             translateEl(node, { rich: true })
           } else {
@@ -245,6 +344,10 @@
           }
         })
       })
+
+      if (_nodesCount > 0) {
+        logger.info(`UI Update #${_count++}: ${performance.now() - _now} ms, ${_nodesCount} nodes`)
+      }
 
       if (loaded) return;
       if (i18n) return;
