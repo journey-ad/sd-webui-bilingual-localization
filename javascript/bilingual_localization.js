@@ -182,6 +182,7 @@
 
       case 'title':
         el.title = `${translation}\n${source}`
+        Object.defineProperty(el, 'title', { writable: false }) // prevent title overwritten by hint.js
         break;
 
       case 'placeholder':
