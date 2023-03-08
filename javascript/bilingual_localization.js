@@ -21,6 +21,8 @@
 
     #txtimg_hr_finalres .bilingual__trans_wrapper em,
     #tab_ti .output-html .bilingual__trans_wrapper em,
+    #dynamic-prompting .output-html .bilingual__trans_wrapper em,
+    #txt2img_script_container .output-html .bilingual__trans_wrapper em,
     #available_extensions .extension-tag .bilingual__trans_wrapper em {
       display: none;
     }
@@ -28,7 +30,10 @@
     #settings .bilingual__trans_wrapper:not(#settings .tabitem .bilingual__trans_wrapper),
     label>span>.bilingual__trans_wrapper,
     .w-full>span>.bilingual__trans_wrapper,
-    .output-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper) {
+    .output-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper),
+    .output-markdown .bilingual__trans_wrapper,
+    .posex_setting_cont .bilingual__trans_wrapper:not(.posex_bg .bilingual__trans_wrapper) /* Posex extension */
+    {
       font-size: 12px;
       align-items: flex-start;
     }
@@ -51,9 +56,15 @@
     div[data-testid="image"]>div>div.touch-none>div {
       background-color: rgba(255, 255, 255, .6);
       color: #222;
-    }`
+    }
+    
+    /* Posex extension */
+    .posex_bg {
+      white-space: nowrap;
+    }
+    `
 
-  let i18n = null, config = null;
+  let i18n = null, i18nRegex = {}, config = null;
 
   // First load
   function setup() {
@@ -75,7 +86,19 @@
     logger.log('Bilingual Localization initialized.')
 
     // Load localization file
-    i18n = JSON.parse(readFile(dirs[file]))
+    i18n = JSON.parse(readFile(dirs[file]), (key, value) => {
+      // parse regex translations
+      if (key.startsWith('@@')) {
+        i18nRegex[key.slice(2)] = value
+      } else {
+        return value
+      }
+    })
+
+    logger.group('Localization file loaded.')
+    logger.log('i18n', i18n)
+    logger.log('i18nRegex', i18nRegex)
+    logger.groupEnd()
 
     translatePage()
   }
@@ -90,7 +113,7 @@
       "textarea[placeholder], select, option", // text box placeholder and select element
       ".transition > div > span:not([class])", // collapse panel added by extension
       ".tabitem .pointer-events-none", // upper left corner of image upload panel
-      ".output-html:not(#footer)", // output html exclude footer
+      "#modelmerger_interp_description .output-html", // model merger description
       "#lightboxModal span" // image preview lightbox
     ])
       .forEach(el => translateEl(el, { deep: true }))
@@ -98,6 +121,8 @@
     querySelectorAll([
       'div[data-testid="image"] > div > div', // description of image upload panel
       '#extras_image_batch > div', //  description of extras image batch file upload panel
+      ".output-html:not(#footer), .output-markdown", // output html exclude footer
+      '#dynamic-prompting' // dynamic-prompting extension
     ])
       .forEach(el => translateEl(el, { rich: true }))
 
@@ -128,8 +153,6 @@
 
     if (el.tagName === 'OPTION') {
       doTranslate(el, el.textContent, 'option')
-    } else {
-      doTranslate(el, el.textContent, 'element')
     }
 
     if (deep || rich) {
@@ -147,6 +170,8 @@
           translateEl(node, { deep, rich })
         }
       })
+    } else {
+      doTranslate(el, el.textContent, 'element')
     }
   }
 
@@ -158,9 +183,21 @@
     source = source.trim()
     if (!source) return
     if (re_num.test(source)) return
-    if (re_emoji.test(source)) return
+    // if (re_emoji.test(source)) return
 
     let translation = i18n[source]
+
+    if (!translation) {
+      for (let regex in i18nRegex) {
+        regex = getRegex(regex)
+        if (regex && regex.test(source)) {
+          logger.log('regex', regex, source)
+          translation = source.replace(regex, i18nRegex[regex])
+          break;
+        }
+      }
+    }
+
     if (!translation) return
     if (source === translation) return
 
@@ -220,6 +257,25 @@
   function htmlEncode(htmlStr) {
     return htmlStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+  }
+
+  // get regex object from string
+  function getRegex(regex) {
+    try {
+      regex = regex.trim();
+      let parts = regex.split('/');
+      if (regex[0] !== '/' || parts.length < 3) {
+        regex = regex.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); //escap common string
+        return new RegExp(regex);
+      }
+
+      const option = parts[parts.length - 1];
+      const lastIndex = regex.lastIndexOf('/');
+      regex = regex.substring(1, lastIndex);
+      return new RegExp(regex, option);
+    } catch (e) {
+      return null
+    }
   }
 
   // Load file

@@ -10,12 +10,14 @@
 ## Features
 - Bilingual translation, no need to worry about how to find the original button.
 - Compatible with language pack extensions, no need to re-import.
+- Support dynamic translation of title hints.
+- Additional support RegExp pattern, more flexible translation.
 
 ## Installation
 
 Choose one of the following methods, Need to use webui with extension support <sup>(Versions after 2023)</sup>
 
-### Method 1
+#### Method 1
 
 Use the `Install from URL` provided by webui to install
 
@@ -30,7 +32,7 @@ After that, switch to the <kbd>Installed</kbd> panel and click the <kbd>Apply an
 ![Snipaste_2023-02-28_00-29-14](https://user-images.githubusercontent.com/16256221/221625345-9e656f25-89dd-4361-8ee5-f4ab39d18ca4.png)
 
 
-### Method 2
+#### Method 2
 
 Clone to your extension directory manually.
 
@@ -46,6 +48,18 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd> panel, select the localization file you want to enable and click on the <kbd>Apply settings</kbd> and <kbd>Reload UI</kbd> buttons in turn.
 
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## RegExp pattern
+
+Localization support RegExp pattern, syntax rule is `@@<REGEXP>`, capturing group is `$n`, doc: [String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)
+```json
+{
+  ...
+  "@@/^(\\d+) images in this directory, divided into (\\d+) pages$/": "目录中有$1张图片，共$2页",
+  "@@/^Favorites path from settings: (.*)$/": "设置的收藏夹目录：$1",
+  ...
+}
+```
 
 ## How to get localization file
 
