@@ -61,14 +61,18 @@
       enabled: opts["bilingual_localization_enabled"],
       file: opts["bilingual_localization_file"],
       dirs: opts["bilingual_localization_dirs"],
-      order: opts["bilingual_localization_order"]
+      order: opts["bilingual_localization_order"],
+      enableLogger: opts["bilingual_localization_logger"]
     }
 
-    let { enabled, file, dirs } = config
+    let { enabled, file, dirs, enableLogger } = config
 
     if (!enabled || file === "None" || dirs === "None") return
 
     dirs = JSON.parse(dirs)
+
+    enableLogger && logger.init('Bilingual')
+    logger.log('Bilingual Localization initialized.')
 
     // Load localization file
     i18n = JSON.parse(readFile(dirs[file]))
@@ -114,7 +118,7 @@
     if (!i18n) return // translation not ready.
     if (el.matches?.(ignore_selector)) return // ignore some elements.
 
-    if (el.title || el.tagName === 'SELECT') {
+    if (el.title) {
       doTranslate(el, el.title, 'title')
     }
 
@@ -128,59 +132,30 @@
       doTranslate(el, el.textContent, 'element')
     }
 
-    Array.from(el.childNodes).forEach(node => {
-      if (node.nodeName === '#text') {
-        if (rich) {
-          doTranslate(node, node.textContent, 'text')
-          return
-        }
+    if (deep || rich) {
+      Array.from(el.childNodes).forEach(node => {
+        if (node.nodeName === '#text') {
+          if (rich) {
+            doTranslate(node, node.textContent, 'text')
+            return
+          }
 
-        if (deep) {
-          doTranslate(node, node.textContent, 'element')
+          if (deep) {
+            doTranslate(node, node.textContent, 'element')
+          }
+        } else if (node.childNodes.length > 0) {
+          translateEl(node, { deep, rich })
         }
-      } else if (node.childNodes.length > 0) {
-        translateEl(node, { deep, rich })
-      }
-    })
+      })
+    }
   }
 
   const re_num = /^[\.\d]+$/,
     re_emoji = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]/u
 
   function doTranslate(el, source, type) {
-    source = source.trim()
-
-    /**
-     * Process the element's title property.
-     * Due to hint.js resetting the title when the UI is updated, some extra work is required here.
-     */
-    if (type === 'title') {
-      const elDescriptor = Object.getOwnPropertyDescriptor(el, 'title')
-      if (elDescriptor && elDescriptor.get) return // already translated
-
-      const title_translation = doTranslate(el, source)
-      let title = title_translation ? `${title_translation}\n${source}` : source
-
-      // set the translation to the element title
-      el.setAttribute('title', title)
-
-      // translate when title is changed
-      Object.defineProperty(el, 'title', {
-        get() {
-          return title
-        },
-        set(value) {
-          const title_translation = doTranslate(el, value)
-          title = title_translation ? `${title_translation}\n${value}` : value
-          this.setAttribute('title', title)
-        }
-      })
-
-      return
-    }
-
     if (el.__bilingual_localization_translated) return
-
+    source = source.trim()
     if (!source) return
     if (re_num.test(source)) return
     if (re_emoji.test(source)) return
@@ -208,10 +183,15 @@
         } else {
           el.replaceWith(htmlEl)
         }
+        Object.defineProperty(el, '__bilingual_localization_translated', { value: true })
         break;
 
       case 'option':
         el.textContent = `${translation} (${source})`
+        break;
+
+      case 'title':
+        el.title = `${translation}\n${source}`
         break;
 
       case 'placeholder':
@@ -221,8 +201,6 @@
       default:
         return translation
     }
-
-    Object.defineProperty(el, '__bilingual_localization_translated', { value: true })
   }
 
   function querySelector(...args) {
@@ -254,18 +232,21 @@
 
   const logger = (function () {
     const loggerTimerMap = new Map()
-    const loggerConf = { badge: true, label: 'Logger' }
+    const loggerConf = { badge: true, label: 'Logger', enable: false }
     return new Proxy(console, {
       get: (target, propKey) => {
         if (propKey === 'init') {
           return (label) => {
             loggerConf.label = label
+            loggerConf.enable = true
           }
         }
 
         if (!(propKey in target)) return undefined
 
         return (...args) => {
+          if (!loggerConf.enable) return
+
           let color = ['#39cfe1', '#006cab']
 
           let label, start
@@ -321,32 +302,35 @@
     }
     gradioApp().appendChild($styleEL);
 
-    logger.init('Bilingual')
-    logger.log('Bilingual Localization initialized.')
-
     let loaded = false
     let _count = 0
-    onUiUpdate((m) => {
+
+    const observer = new MutationObserver(mutations => {
       if (Object.keys(localization).length) return; // disabled if original translation enabled
       if (Object.keys(opts).length === 0) return; // does nothing if opts is not loaded
 
       let _nodesCount = 0, _now = performance.now()
 
-      m.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
-          if (node.className === 'bilingual__trans_wrapper') return
-
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes') {
           _nodesCount++
-          if (node.nodeType === 1 && node.className === 'output-html') {
-            translateEl(node, { rich: true })
-          } else {
-            translateEl(node, { deep: true })
-          }
-        })
-      })
+          translateEl(mutation.target)
+        } else {
+          mutation.addedNodes.forEach(node => {
+            if (node.className === 'bilingual__trans_wrapper') return
+
+            _nodesCount++
+            if (node.nodeType === 1 && node.className === 'output-html') {
+              translateEl(node, { rich: true })
+            } else {
+              translateEl(node, { deep: true })
+            }
+          })
+        }
+      }
 
       if (_nodesCount > 0) {
-        logger.info(`UI Update #${_count++}: ${performance.now() - _now} ms, ${_nodesCount} nodes`)
+        logger.info(`UI Update #${_count++}: ${performance.now() - _now} ms, ${_nodesCount} nodes`, mutations)
       }
 
       if (loaded) return;
@@ -354,6 +338,13 @@
 
       loaded = true
       setup()
+    })
+
+    observer.observe(gradioApp(), {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['title', 'placeholder']
     })
   }
 
