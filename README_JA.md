@@ -52,7 +52,7 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 
 ## 正規表現パターン
 
-日本語化では正規表現パターンがサポートされます。構文ルールは`@@<REGEXP>`、キャプチャグループは`$n`です。ドキュメント：[String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)。
+正規表現を使った日本語化が可能です。構文ルールは`@@<REGEXP>`、キャプチャグループは`$n`です。ドキュメント：[String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)。
 ```json
 {
   ...
