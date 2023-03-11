@@ -9,50 +9,50 @@
 
 ## 特徴
 - バイリンガル対応により、元のボタンを探す必要がありません。
-- 言語パックの拡張機能に対応するので、再インストールが不要。
-- 動的なタイトルヒントの翻訳をサポートします。
+- 日本語化拡張機能と互換性があり、ファイルを取り込み直す必要はありません。
+- ツールチップの動的翻訳をサポートします。
 - 正規表現パターンによる柔軟な翻訳が可能です。
 
-## Installation
+## インストール
 
 以下の方法から選択します。
-拡張機能に対応したWebUIが必要です。<sup>(Versions after 2023)</sup>
+拡張機能に対応したWebUI<sup>(2023年以降のバージョン)</sup>が必要です。
 
-#### Method 1
+#### 方法1
 
-webuiの`Install from URL`でインストール
+WebUIの`Install from URL`でインストールを行います。
 
-<kbd>Extensions</kbd> - <kbd>Install from URL</kbd>を順にクリック
+<kbd>Extensions</kbd> - <kbd>Install from URL</kbd>を順にクリックします。
 
-まず、テキストボックスに`https://github.com/journey-ad/sd-webui-bilingual-localization`を入力し、<kbd>Install</kbd>クリック
+1個目のテキストボックスに`https://github.com/journey-ad/sd-webui-bilingual-localization`を入力し、<kbd>Install</kbd>ボタンをクリックします。
 
 ![Snipaste_2023-02-28_00-27-48](https://user-images.githubusercontent.com/16256221/221625310-a6ef0b4c-a1e0-46bb-be9c-6d88cd0ad684.png)
 
-その後、<kbd>Installed</kbd>パネルに切り替え、<kbd>Apply and restart UI</kbd>をクリック
+その後、<kbd>Installed</kbd>パネルに切り替え、<kbd>Apply and restart UI</kbd>ボタンをクリックします。
 
 ![Snipaste_2023-02-28_00-29-14](https://user-images.githubusercontent.com/16256221/221625345-9e656f25-89dd-4361-8ee5-f4ab39d18ca4.png)
 
 
-#### Method 2
+#### 方法2
 
-手動でExtensionディレクトリにcloneする
+拡張機能のディレクトリに手動でcloneします。
 
 ```bash
 git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensions/sd-webui-bilingual-localization
 ```
 
-## Usage
+## 使用方法
 
-> **⚠️重要⚠️**   
+> **⚠️重要⚠️**  
 > <kbd>Settings</kbd> - <kbd>User interface</kbd> - <kbd>Localization</kbd>が`None`に設定されていることを確認してください。
 
-In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>パネルで、有効にしたい言語を選択し、<kbd>Apply settings</kbd> and <kbd>Reload UI</kbd>をクリック
+<kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>パネルで、有効にしたい言語ファイル名を選択し、<kbd>Apply settings</kbd>ボタンと<kbd>Reload UI</kbd>ボタンを順にクリックします。
 
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
 
-## RegExp pattern
+## 正規表現パターン
 
-言語対応の正規表現パターンで、構文ルールは`@@<REGEXP>`、キャプチャグループは`$n`です。ドキュメント：[String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)。
+正規表現を使った日本語化が可能です。構文ルールは`@@<REGEXP>`、キャプチャグループは`$n`です。ドキュメント：[String.prototype.replace()](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/replace)。
 ```json
 {
   ...
@@ -62,6 +62,6 @@ In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>パネルで、有効�
 }
 ```
 
-## 言語ファイルの取得
+## 日本語化ファイルの取得
 
-内蔵の言語ファイルは提供されなくなりましたので、サードパーティの拡張機能をインストールし、[Usage](#usage)のように設定してください。
+内蔵の日本語化ファイルは提供されなくなりました。サードパーティーの日本語化拡張機能をインストールし、当ページの[使用方法](#使用方法)に記載されている方法でセットアップしてください。
