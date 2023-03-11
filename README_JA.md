@@ -43,7 +43,7 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 
 ## 使用方法
 
-> **⚠️重要⚠️**
+> **⚠️重要⚠️**  
 > <kbd>Settings</kbd> - <kbd>User interface</kbd> - <kbd>Localization</kbd>が`None`に設定されていることを確認してください。
 
 <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>パネルで、有効にしたい言語ファイル名を選択し、<kbd>Apply settings</kbd> - <kbd>Reload UI</kbd>を順にクリックします。
