@@ -1,7 +1,6 @@
 (function () {
   const customCSS = `
     .bilingual__trans_wrapper {
-      flex: none;
       display: inline-flex;
       flex-direction: column;
       align-items: center;
@@ -230,12 +229,11 @@
 
     let translation = i18n[source] || checkRegex(source)
 
-    if (!translation) {
+    if (!translation || source === translation) {
       if (el.textContent === '__biligual__will_be_replaced__') el.textContent = source // restore original text if translation not exist
+      if (el.nextSibling?.className === 'bilingual__trans_wrapper') el.nextSibling.remove() // remove exist translation if translation not exist
       return
     }
-
-    if (source === translation) return
 
     if (config.order === "Original First") {
       [source, translation] = [translation, source]
@@ -255,12 +253,14 @@
             (node.textContent.trim() === source || node.textContent.trim() === '__biligual__will_be_replaced__')
           )
 
-          if(textNode) {
+          if (textNode) {
             textNode.textContent = ''
+            if (textNode.nextSibling?.className === 'bilingual__trans_wrapper') textNode.nextSibling.remove()
             textNode.parentNode.insertBefore(htmlEl, textNode.nextSibling)
           }
         } else {
           el.textContent = ''
+          if (el.nextSibling?.className === 'bilingual__trans_wrapper') el.nextSibling.remove()
           el.parentNode.insertBefore(htmlEl, el.nextSibling)
         }
         break;
@@ -281,6 +281,14 @@
         return translation
     }
   }
+
+  function gradioApp() {
+    const elems = document.getElementsByTagName('gradio-app')
+    const elem = elems.length == 0 ? document : elems[0]
+
+    if (elem !== document) elem.getElementById = function(id){ return document.getElementById(id) }
+    return elem.shadowRoot ? elem.shadowRoot : elem
+}
 
   function querySelector(...args) {
     return gradioApp()?.querySelector(...args)
@@ -422,7 +430,11 @@
       let _nodesCount = 0, _now = performance.now()
 
       for (const mutation of mutations) {
-        if (mutation.type === 'attributes') {
+        if (mutation.type === 'characterData') {
+          if (mutation.target?.parentElement?.parentElement?.tagName === 'LABEL') {
+            translateEl(mutation.target)
+          }
+        } else if (mutation.type === 'attributes') {
           _nodesCount++
           translateEl(mutation.target)
         } else {
@@ -453,6 +465,7 @@
     })
 
     observer.observe(gradioApp(), {
+      characterData: true,
       childList: true,
       subtree: true,
       attributes: true,
