@@ -1,6 +1,7 @@
 (function () {
   const customCSS = `
     .bilingual__trans_wrapper {
+      flex: none;
       display: inline-flex;
       flex-direction: column;
       align-items: center;
@@ -12,36 +13,57 @@
       font-style: normal;
     }
 
-    fieldset span.text-gray-500:has(.bilingual__trans_wrapper),
-    .gr-block.gr-box span.text-gray-500:has(.bilingual__trans_wrapper),
-    label.block span:has(.bilingual__trans_wrapper) {
-      top: -0.8em;
-      line-height: 1;
-    }
-
     #txtimg_hr_finalres .bilingual__trans_wrapper em,
     #tab_ti .output-html .bilingual__trans_wrapper em,
+    #tab_ti .gradio-html .bilingual__trans_wrapper em,
     #dynamic-prompting .output-html .bilingual__trans_wrapper em,
+    #dynamic-prompting .gradio-html .bilingual__trans_wrapper em,
     #txt2img_script_container .output-html .bilingual__trans_wrapper em,
-    #available_extensions .extension-tag .bilingual__trans_wrapper em {
+    #txt2img_script_container .gradio-html .bilingual__trans_wrapper em,
+    #available_extensions .extension-tag .bilingual__trans_wrapper em,
+    .gradio-image div[data-testid="image"] .bilingual__trans_wrapper em {
       display: none;
     }
     
     #settings .bilingual__trans_wrapper:not(#settings .tabitem .bilingual__trans_wrapper),
     label>span>.bilingual__trans_wrapper,
+    .label-wrap>span>.bilingual__trans_wrapper,
     .w-full>span>.bilingual__trans_wrapper,
+    .context-menu-items .bilingual__trans_wrapper,
+    .single-select .bilingual__trans_wrapper, ul.options .inner-item + .bilingual__trans_wrapper,
     .output-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper),
+    .gradio-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper),
     .output-markdown .bilingual__trans_wrapper,
-    .posex_setting_cont .bilingual__trans_wrapper:not(.posex_bg .bilingual__trans_wrapper) /* Posex extension */
+    .posex_setting_cont .bilingual__trans_wrapper:not(.posex_bg .bilingual__trans_wrapper), /* Posex extension */
+    #dynamic-prompting .bilingual__trans_wrapper
     {
       font-size: 12px;
       align-items: flex-start;
     }
 
     #extensions label .bilingual__trans_wrapper,
-    #available_extensions td .bilingual__trans_wrapper {
+    #available_extensions td .bilingual__trans_wrapper,
+    .label-wrap>span>.bilingual__trans_wrapper {
       font-size: inherit;
       line-height: inherit;
+    }
+
+    .label-wrap>span:first-of-type {
+      font-size: 13px;
+      line-height: 1;
+      padding: 4px 6px;
+    }
+    .label-wrap + div {
+      padding: var(--block-padding, 10px 12px);
+    }
+
+    label>.wrap>ul.options {
+      min-width: var(--size-full);
+      width: max-content;
+    }
+
+    #txt2img_script_container > div {
+      margin-top: var(--layout-gap, 12px);
     }
     
     textarea::placeholder {
@@ -53,9 +75,19 @@
       line-height: 1;
     }
     
-    div[data-testid="image"]>div>div.touch-none>div {
+    div[data-testid="image"] .start-prompt {
       background-color: rgba(255, 255, 255, .6);
       color: #222;
+      transition: opacity .2s ease-in-out;
+    }
+    div[data-testid="image"]:hover .start-prompt {
+      opacity: 0;
+    }
+
+    .label-wrap > span.icon {
+      width: 1em;
+      height: 1em;
+      transform-origin: center center;
     }
     
     /* Posex extension */
@@ -111,9 +143,10 @@
     querySelectorAll([
       "label span, fieldset span, button", // major label and button description text
       "textarea[placeholder], select, option", // text box placeholder and select element
-      ".transition > div > span:not([class])", // collapse panel added by extension
+      ".transition > div > span:not([class])", ".label-wrap > span", // collapse panel added by extension
       ".tabitem .pointer-events-none", // upper left corner of image upload panel
       "#modelmerger_interp_description .output-html", // model merger description
+      "#modelmerger_interp_description .gradio-html", // model merger description
       "#lightboxModal span" // image preview lightbox
     ])
       .forEach(el => translateEl(el, { deep: true }))
@@ -121,7 +154,7 @@
     querySelectorAll([
       'div[data-testid="image"] > div > div', // description of image upload panel
       '#extras_image_batch > div', //  description of extras image batch file upload panel
-      ".output-html:not(#footer), .output-markdown", // output html exclude footer
+      ".output-html:not(#footer), .gradio-html:not(#footer), .output-markdown", // output html exclude footer
       '#dynamic-prompting' // dynamic-prompting extension
     ])
       .forEach(el => translateEl(el, { rich: true }))
@@ -175,30 +208,33 @@
     }
   }
 
+  function checkRegex(source) {
+    for (let regex in i18nRegex) {
+      regex = getRegex(regex)
+      if (regex && regex.test(source)) {
+        logger.log('regex', regex, source)
+        return source.replace(regex, i18nRegex[regex])
+      }
+    }
+  }
+
   const re_num = /^[\.\d]+$/,
     re_emoji = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]/u
 
   function doTranslate(el, source, type) {
-    if (el.__bilingual_localization_translated) return
+    if (!i18n) return // translation not ready.
     source = source.trim()
     if (!source) return
     if (re_num.test(source)) return
     // if (re_emoji.test(source)) return
 
-    let translation = i18n[source]
+    let translation = i18n[source] || checkRegex(source)
 
     if (!translation) {
-      for (let regex in i18nRegex) {
-        regex = getRegex(regex)
-        if (regex && regex.test(source)) {
-          logger.log('regex', regex, source)
-          translation = source.replace(regex, i18nRegex[regex])
-          break;
-        }
-      }
+      if (el.textContent === '__biligual__will_be_replaced__') el.textContent = source // restore original text if translation not exist
+      return
     }
 
-    if (!translation) return
     if (source === translation) return
 
     if (config.order === "Original First") {
@@ -214,13 +250,19 @@
         const htmlStr = `<div class="bilingual__trans_wrapper">${htmlEncode(translation)}<em>${htmlEncode(source)}</em></div>`
         const htmlEl = parseHtmlStringToElement(htmlStr)
         if (el.hasChildNodes()) {
-          const textNode = Array.from(el.childNodes).find(node => node.nodeName === '#text' && node.textContent.trim() === source)
+          const textNode = Array.from(el.childNodes).find(node =>
+            node.nodeName === '#text' &&
+            (node.textContent.trim() === source || node.textContent.trim() === '__biligual__will_be_replaced__')
+          )
 
-          textNode && textNode.replaceWith(htmlEl)
+          if(textNode) {
+            textNode.textContent = ''
+            textNode.parentNode.insertBefore(htmlEl, textNode.nextSibling)
+          }
         } else {
-          el.replaceWith(htmlEl)
+          el.textContent = ''
+          el.parentNode.insertBefore(htmlEl, el.nextSibling)
         }
-        Object.defineProperty(el, '__bilingual_localization_translated', { value: true })
         break;
 
       case 'option':
@@ -246,6 +288,18 @@
 
   function querySelectorAll(...args) {
     return gradioApp()?.querySelectorAll(...args)
+  }
+
+  function delegateEvent(parent, eventType, selector, handler) {
+    parent.addEventListener(eventType, function (event) {
+      var target = event.target;
+      while (target !== parent) {
+        if (target.matches(selector)) {
+          handler.call(target, event);
+        }
+        target = target.parentNode;
+      }
+    });
   }
 
   function parseHtmlStringToElement(htmlStr) {
@@ -378,6 +432,8 @@
             _nodesCount++
             if (node.nodeType === 1 && node.className === 'output-html') {
               translateEl(node, { rich: true })
+            } else if (node.nodeType === 3) {
+              doTranslate(node, node.textContent, 'text')
             } else {
               translateEl(node, { deep: true })
             }
@@ -402,6 +458,26 @@
       attributes: true,
       attributeFilter: ['title', 'placeholder']
     })
+
+    // process gradio dropdown menu
+    delegateEvent(gradioApp(), 'mousedown', 'ul.options .item', function (event) {
+      const { target } = event
+
+      if (!target.classList.contains('item')) {
+        // simulate click menu item
+        target.closest('.item').dispatchEvent(new Event('mousedown', { bubbles: true }))
+        return
+      }
+
+      const source = target.dataset.value
+      const $labelEl = target?.closest('.wrap')?.querySelector('.wrap-inner .single-select') // the label element
+
+      if (source && $labelEl) {
+        $labelEl.title = titles[source] || '' // set title from hints.js
+        $labelEl.textContent = "__biligual__will_be_replaced__" // marked as will be replaced
+        doTranslate($labelEl, source, 'element') // translate the label element
+      }
+    });
   }
 
   // Init after page loaded
