@@ -26,6 +26,7 @@
     
     #settings .bilingual__trans_wrapper:not(#settings .tabitem .bilingual__trans_wrapper),
     label>span>.bilingual__trans_wrapper,
+    fieldset>span>.bilingual__trans_wrapper,
     .label-wrap>span>.bilingual__trans_wrapper,
     .w-full>span>.bilingual__trans_wrapper,
     .context-menu-items .bilingual__trans_wrapper,
@@ -50,15 +51,6 @@
     .label-wrap>span:first-of-type {
       font-size: 13px;
       line-height: 1;
-      padding: 4px 6px;
-    }
-    .label-wrap + div {
-      padding: var(--block-padding, 10px 12px);
-    }
-
-    label>.wrap>ul.options {
-      min-width: var(--size-full);
-      width: max-content;
     }
 
     #txt2img_script_container > div {
@@ -87,6 +79,10 @@
       width: 1em;
       height: 1em;
       transform-origin: center center;
+    }
+
+    .gradio-dropdown ul.options li.item {
+      padding: 0.3em 0.4em !important;
     }
     
     /* Posex extension */
@@ -286,9 +282,9 @@
     const elems = document.getElementsByTagName('gradio-app')
     const elem = elems.length == 0 ? document : elems[0]
 
-    if (elem !== document) elem.getElementById = function(id){ return document.getElementById(id) }
+    if (elem !== document) elem.getElementById = function (id) { return document.getElementById(id) }
     return elem.shadowRoot ? elem.shadowRoot : elem
-}
+  }
 
   function querySelector(...args) {
     return gradioApp()?.querySelector(...args)
@@ -474,6 +470,9 @@
 
     // process gradio dropdown menu
     delegateEvent(gradioApp(), 'mousedown', 'ul.options .item', function (event) {
+      if (Object.keys(localization).length) return; // disabled if original translation enabled
+      if (Object.keys(opts).length === 0) return; // does nothing if opts is not loaded
+
       const { target } = event
 
       if (!target.classList.contains('item')) {
