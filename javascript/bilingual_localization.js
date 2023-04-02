@@ -15,11 +15,10 @@
     #txtimg_hr_finalres .bilingual__trans_wrapper em,
     #tab_ti .output-html .bilingual__trans_wrapper em,
     #tab_ti .gradio-html .bilingual__trans_wrapper em,
-    #dynamic-prompting .output-html .bilingual__trans_wrapper em,
-    #dynamic-prompting .gradio-html .bilingual__trans_wrapper em,
-    #txt2img_script_container .output-html .bilingual__trans_wrapper em,
-    #txt2img_script_container .gradio-html .bilingual__trans_wrapper em,
+    #sddp-dynamic-prompting .gradio-html .bilingual__trans_wrapper em,
     #available_extensions .extension-tag .bilingual__trans_wrapper em,
+    #available_extensions .date_added .bilingual__trans_wrapper em,
+    #available_extensions+p>.bilingual__trans_wrapper em,
     .gradio-image div[data-testid="image"] .bilingual__trans_wrapper em {
       display: none;
     }
@@ -32,8 +31,9 @@
     .context-menu-items .bilingual__trans_wrapper,
     .single-select .bilingual__trans_wrapper, ul.options .inner-item + .bilingual__trans_wrapper,
     .output-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper),
-    .gradio-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper),
+    .gradio-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper, .posex_cont .bilingual__trans_wrapper),
     .output-markdown .bilingual__trans_wrapper,
+    .gradio-markdown .bilingual__trans_wrapper,
     .posex_setting_cont .bilingual__trans_wrapper:not(.posex_bg .bilingual__trans_wrapper), /* Posex extension */
     #dynamic-prompting .bilingual__trans_wrapper
     {
@@ -149,7 +149,7 @@
     querySelectorAll([
       'div[data-testid="image"] > div > div', // description of image upload panel
       '#extras_image_batch > div', //  description of extras image batch file upload panel
-      ".output-html:not(#footer), .gradio-html:not(#footer), .output-markdown", // output html exclude footer
+      ".output-html:not(#footer), .gradio-html:not(#footer), .output-markdown, .gradio-markdown", // output html exclude footer
       '#dynamic-prompting' // dynamic-prompting extension
     ])
       .forEach(el => translateEl(el, { rich: true }))
@@ -438,7 +438,7 @@
             if (node.className === 'bilingual__trans_wrapper') return
 
             _nodesCount++
-            if (node.nodeType === 1 && node.className === 'output-html') {
+            if (node.nodeType === 1 && /(output|gradio)-(html|markdown)/.test(node.className)) {
               translateEl(node, { rich: true })
             } else if (node.nodeType === 3) {
               doTranslate(node, node.textContent, 'text')
