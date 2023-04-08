@@ -11,7 +11,7 @@
 - 全新实现的双语对照翻译功能，不必再担心切换翻译后找不到原始功能
 - 兼容原生语言包扩展，无需重新导入多语言语料
 - 支持动态title提示的翻译
-- 额外支持正则表达式替换，翻译更加灵活
+- 额外支持作用域和正则表达式替换，翻译更加灵活
 
 ## 安装
 
@@ -45,6 +45,20 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 
 在<kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>中选择要启用的本地化文件，依次点击<kbd>Apply settings</kbd>和<kbd>Reload UI</kbd>按钮
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## 作用域支持
+
+本地化语料支持限定作用域，防止影响全局翻译，语法规则`##<SCOPE ID>##<TEXT>`   
+具有作用域的语料仅当节点祖先元素的ID匹配指定的作用域时才会生效
+
+```json
+{
+  ...
+  "##tab_ti##Normal": "正态", // 仅id="tab_ti"元素下的`Normal`会被翻译为`正态`
+  "##tab_threedopenpose##Normal": "法线图", // 仅id="tab_threedopenpose"元素下的`Normal`会被翻译为`法线图`
+  ...
+}
+```
 
 ## 正则表达式支持
 

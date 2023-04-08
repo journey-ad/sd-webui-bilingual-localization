@@ -11,7 +11,7 @@
 - バイリンガル対応により、元のボタンを探す必要がありません。
 - 日本語化拡張機能と互換性があり、ファイルを取り込み直す必要はありません。
 - ツールチップの動的翻訳をサポートします。
-- 正規表現パターンによる柔軟な翻訳が可能です。
+- スコープと正規表現パターンによる柔軟な翻訳が可能です。
 
 ## インストール
 
@@ -49,6 +49,18 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd>パネルで、有効にしたい言語ファイル名を選択し、<kbd>Apply settings</kbd>ボタンと<kbd>Reload UI</kbd>ボタンを順にクリックします。
 
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## スコープ
+
+ローカライゼーションは、スコープ化されており、グローバルな影響を防止することができます。構文ルールは`##<SCOPE ID>##<TEXT>`です。   
+スコープを指定するIDが祖先要素のIDと一致する場合にのみ、スコープ化されたテキストが有効になります。
+
+```json
+  ...
+  "##tab_ti##Normal": "正常", // id="tab_ti"要素の下の`Normal`のみが`正常`として変換されます
+  "##tab_threedopenpose##Normal": "法線マップ", // id="tab_threedopenpose"要素の下の`Normal`のみが `法線マップ`として変換されます
+  ...
+```
 
 ## 正規表現パターン
 

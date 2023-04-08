@@ -11,7 +11,7 @@
 - Bilingual translation, no need to worry about how to find the original button.
 - Compatible with language pack extensions, no need to re-import.
 - Support dynamic translation of title hints.
-- Additional support RegExp pattern, more flexible translation.
+- Additional support Scoped and RegExp pattern, more flexible translation.
 
 ## Installation
 
@@ -48,6 +48,20 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd> panel, select the localization file you want to enable and click on the <kbd>Apply settings</kbd> and <kbd>Reload UI</kbd> buttons in turn.
 
 ![Snipaste_2023-02-28_00-04-21](https://user-images.githubusercontent.com/16256221/221625729-73519629-8c1f-4eb5-99db-a1d3f4b58a87.png)
+
+## Scoped
+
+Localization supports scoped to prevent global impact. The syntax rule is `##<SCOPE ID>##<TEXT>`.   
+Scoped text is effective only when the ID of the ancestor element of the node matches the specified scope.
+
+```json
+{
+  ...
+  "##tab_ti##Normal": "正态", // only 'Normal' under the element with id='tab_ti' will be translated to '正态'.
+  "##tab_threedopenpose##Normal": "法线图", // only 'Normal' under the element with id='tab_ti' will be translated to '法线图'.
+  ...
+}
+```
 
 ## RegExp pattern
 

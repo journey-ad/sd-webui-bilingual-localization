@@ -34,6 +34,9 @@
     .gradio-html .bilingual__trans_wrapper:not(th .bilingual__trans_wrapper, .posex_cont .bilingual__trans_wrapper),
     .output-markdown .bilingual__trans_wrapper,
     .gradio-markdown .bilingual__trans_wrapper,
+    .gradio-image>div.float .bilingual__trans_wrapper,
+    .gradio-file>div.float .bilingual__trans_wrapper,
+    .gradio-code>div.float .bilingual__trans_wrapper,
     .posex_setting_cont .bilingual__trans_wrapper:not(.posex_bg .bilingual__trans_wrapper), /* Posex extension */
     #dynamic-prompting .bilingual__trans_wrapper
     {
@@ -91,7 +94,7 @@
     }
     `
 
-  let i18n = null, i18nRegex = {}, config = null;
+  let i18n = null, i18nRegex = {}, i18nScope = {}, scopedSource = {}, config = null;
 
   // First load
   function setup() {
@@ -113,10 +116,19 @@
     logger.log('Bilingual Localization initialized.')
 
     // Load localization file
+    const regex_scope = /^##(?<scope>\S+)##(?<skey>\S+)$/ // ##scope##.skey
     i18n = JSON.parse(readFile(dirs[file]), (key, value) => {
       // parse regex translations
       if (key.startsWith('@@')) {
         i18nRegex[key.slice(2)] = value
+      } else if (regex_scope.test(key)) {
+        // parse scope translations
+        const { scope, skey } = key.match(regex_scope).groups
+        i18nScope[scope] ||= {}
+        i18nScope[scope][skey] = value
+
+        scopedSource[skey] ||= []
+        scopedSource[skey].push(scope)
       } else {
         return value
       }
@@ -125,6 +137,7 @@
     logger.group('Localization file loaded.')
     logger.log('i18n', i18n)
     logger.log('i18nRegex', i18nRegex)
+    logger.log('i18nScope', i18nScope)
     logger.groupEnd()
 
     translatePage()
@@ -162,7 +175,9 @@
       "label span, fieldset span, button", // major label and button description text
       "textarea[placeholder], select, option", // text box placeholder and select element
       ".transition > div > span:not([class])", ".label-wrap > span", // collapse panel added by extension
-      ".tabitem .pointer-events-none", // upper left corner of image upload panel
+      ".gradio-image>div.float", // image upload description
+      ".gradio-file>div.float", // file upload description
+      ".gradio-code>div.float", // code editor description
       "#modelmerger_interp_description .output-html", // model merger description
       "#modelmerger_interp_description .gradio-html", // model merger description
       "#lightboxModal span" // image preview lightbox
@@ -246,7 +261,18 @@
     if (re_num.test(source)) return
     // if (re_emoji.test(source)) return
 
-    let translation = i18n[source] || checkRegex(source)
+    let translation = i18n[source] || checkRegex(source),
+      scopes = scopedSource[source]
+
+    if (scopes) {
+      console.log('scope', el, source);
+      for (let scope of scopes) {
+        if (el.parentElement.closest(`#${scope}`)) {
+          translation = i18nScope[scope][source]
+          break
+        }
+      }
+    }
 
     if (!translation || source === translation) {
       if (el.textContent === '__biligual__will_be_replaced__') el.textContent = source // restore original text if translation not exist
