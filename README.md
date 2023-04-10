@@ -57,8 +57,8 @@ Scoped text is effective only when the ID of the ancestor element of the node ma
 ```json
 {
   ...
-  "##tab_ti##Normal": "正态", // only 'Normal' under the element with id='tab_ti' will be translated to '正态'.
-  "##tab_threedopenpose##Normal": "法线图", // only 'Normal' under the element with id='tab_ti' will be translated to '法线图'.
+  "##tab_ti##Normal": "正态", // only `Normal` under the element with id="tab_ti" will be translated to `正态`.
+  "##tab_threedopenpose##Normal": "法线图", // only `Normal` under the element with id="tab_threedopenpose" will be translated to `法线图`.
   ...
 }
 ```
