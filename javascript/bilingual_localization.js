@@ -469,7 +469,7 @@
     let _count = 0
 
     const observer = new MutationObserver(mutations => {
-      if (Object.keys(localization).length) return; // disabled if original translation enabled
+      if (window.localization && Object.keys(window.localization).length) return; // disabled if original translation enabled
       if (Object.keys(opts).length === 0) return; // does nothing if opts is not loaded
 
       let _nodesCount = 0, _now = performance.now()
