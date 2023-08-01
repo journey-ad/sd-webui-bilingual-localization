@@ -5,13 +5,17 @@ import os
 import gradio as gr
 from pathlib import Path
 from modules import script_callbacks, shared
+from modules.paths import extensions_dir
 import json
 
 localizations = {}
-localizations_dir = shared.cmd_opts.localizations_dir if "localizations_dir" in shared.cmd_opts else "localizations"
+
+localizations_dirs = [shared.cmd_opts.localizations_dir if "localizations_dir" in shared.cmd_opts else "localizations"]
+localizations_dirs += [os.path.join(extensions_dir, ext_name, "localizations") for ext_name in os.listdir(extensions_dir)]
 
 def list_localizations(dirname):
-    localizations.clear()
+    if not os.path.isdir(dirname):
+        return
 
     print("dirname: ", dirname)
 
@@ -29,14 +33,18 @@ def list_localizations(dirname):
 
     print("localizations: ", localizations)
 
+def list_all_localizations():
+    for locale_dir in localizations_dirs:
+        list_localizations(locale_dir)
 
-list_localizations(localizations_dir)
+list_all_localizations()
 
 # Webui root path
 ROOT_DIR = Path().absolute()
 
 # The localization files
 I18N_DIRS = { k: str(Path(v).relative_to(ROOT_DIR).as_posix()) for k, v in localizations.items() }
+print(I18N_DIRS)
     
 # Register extension options
 def on_ui_settings():
@@ -48,7 +56,7 @@ def on_ui_settings():
     shared.opts.add_option("bilingual_localization_logger", shared.OptionInfo(False, "Enable Devtools Log", section=BL_SECTION))
 
     # current localization file
-    shared.opts.add_option("bilingual_localization_file", shared.OptionInfo("None", "Localization file (Please leave `User interface` - `Localization` as None)", gr.Dropdown, lambda: {"choices": ["None"] + list(localizations.keys())}, refresh=lambda: list_localizations(localizations_dir), section=BL_SECTION))
+    shared.opts.add_option("bilingual_localization_file", shared.OptionInfo("None", "Localization file (Please leave `User interface` - `Localization` as None)", gr.Dropdown, lambda: {"choices": ["None"] + list(localizations.keys())}, refresh=lambda: list_all_localizations(), section=BL_SECTION))
 
     # translation order
     shared.opts.add_option("bilingual_localization_order", shared.OptionInfo("Translation First", "Translation display order", gr.Radio, {"choices": ["Translation First", "Original First"]}, section=BL_SECTION))
