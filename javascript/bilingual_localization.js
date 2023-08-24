@@ -126,9 +126,13 @@
         let { scope, skey } = key.match(regex_scope).groups
 
         if (scope.startsWith('@')) {
-          scope = scope.replace('@', '')
+          scope = scope.slice(1)
         } else {
           scope = '#' + scope
+        }
+
+        if (!scope.length) {
+          return value
         }
 
         i18nScope[scope] ||= {}
