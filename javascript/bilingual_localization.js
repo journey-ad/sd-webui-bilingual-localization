@@ -116,7 +116,7 @@
     logger.log('Bilingual Localization initialized.')
 
     // Load localization file
-    const regex_scope = /^##(?<scope>\S+)##(?<skey>\S+)$/ // ##scope##.skey
+    const regex_scope = /^##(?<scope>.+)##(?<skey>.+)$/ // ##scope##.skey
     i18n = JSON.parse(readFile(dirs[file]), (key, value) => {
       // parse regex translations
       if (key.startsWith('@@')) {
