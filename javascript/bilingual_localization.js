@@ -94,7 +94,7 @@
     }
     `
 
-  let i18n = null, i18nRegex = {}, i18nScope = {}, scopedSource = {}, config = null;
+  let i18n = null, i18nRegex = new Map(), i18nScope = {}, scopedSource = {}, config = null;
 
   // First load
   function setup() {
@@ -120,7 +120,10 @@
     i18n = JSON.parse(readFile(dirs[file]), (key, value) => {
       // parse regex translations
       if (key.startsWith('@@')) {
-        i18nRegex[key.slice(2)] = value
+        const regex = getRegex(key.slice(2))
+        if (regex instanceof RegExp) {
+          i18nRegex.set(regex, value)
+        }
       } else if (regex_scope.test(key)) {
         // parse scope translations
         const { scope, skey } = key.match(regex_scope).groups
@@ -242,11 +245,10 @@
   }
 
   function checkRegex(source) {
-    for (let regex in i18nRegex) {
-      regex = getRegex(regex)
-      if (regex && regex.test(source)) {
-        logger.log('regex', regex, source)
-        return source.replace(regex, i18nRegex[regex])
+    for (const [regex, value] of i18nRegex.entries()) {
+      if (regex.test(source)) {
+        logger.log('regex', regex, source, value)
+        return source.replace(regex, value)
       }
     }
   }
