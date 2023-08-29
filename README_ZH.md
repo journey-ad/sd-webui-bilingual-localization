@@ -48,14 +48,16 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 
 ## 作用域支持
 
-本地化语料支持限定作用域，防止影响全局翻译，语法规则`##<SCOPE ID>##<TEXT>`   
-具有作用域的语料仅当节点祖先元素的ID匹配指定的作用域时才会生效
+本地化语料支持限定作用域，防止影响全局翻译，语法规则：
+- `##<SCOPE ID>##<TEXT>` 仅当节点祖先元素ID匹配指定的作用域时才会生效
+- `##@<SELECTOR>##<TEXT>` 仅当节点祖先元素匹配指定的CSS选择器时才会生效
 
 ```json
 {
   ...
   "##tab_ti##Normal": "正态", // 仅id="tab_ti"元素下的`Normal`会被翻译为`正态`
   "##tab_threedopenpose##Normal": "法线图", // 仅id="tab_threedopenpose"元素下的`Normal`会被翻译为`法线图`
+  "##@.extra-networks .tab-nav button##Lora": "Lora模型", // 仅class=".extra-networks .tab-nav button"元素下的`Lora`会被翻译为`Lora模型`
   ...
 }
 ```

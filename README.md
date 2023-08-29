@@ -51,14 +51,16 @@ In <kbd>Settings</kbd> - <kbd>Bilingual Localization</kbd> panel, select the loc
 
 ## Scoped
 
-Localization supports scoped to prevent global impact. The syntax rule is `##<SCOPE ID>##<TEXT>`.   
-Scoped text is effective only when the ID of the ancestor element of the node matches the specified scope.
+Localization supports scoped to prevent global polluting. The syntax rules are as follows:
+- `##<SCOPE ID>##<TEXT>` Scoped text will only take effect when the ancestor element ID matches the specified scope.
+- `##@<SELECTOR>##<TEXT>` Scoped text will only take effect when the ancestor element matches the specified CSS selector.
 
 ```json
 {
   ...
-  "##tab_ti##Normal": "正态", // only `Normal` under the element with id="tab_ti" will be translated to `正态`.
-  "##tab_threedopenpose##Normal": "法线图", // only `Normal` under the element with id="tab_threedopenpose" will be translated to `法线图`.
+  "##tab_ti##Normal": "正态", // only the text `Normal` under the element with id="tab_ti" will be translated to `正态`.
+  "##tab_threedopenpose##Normal": "法线图", // only the text `Normal` under the element with id="tab_threedopenpose" will be translated to `法线图`.
+  "##@.extra-networks .tab-nav button##Lora": "Lora模型", // only the text `Lora` under the element with class=".extra-networks .tab-nav button" will be translated to `Lora模型`.
   ...
 }
 ```

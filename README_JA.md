@@ -52,13 +52,15 @@ git clone https://github.com/journey-ad/sd-webui-bilingual-localization extensio
 
 ## スコープ
 
-ローカライゼーションは、スコープ化されており、グローバルな影響を防止することができます。構文ルールは`##<SCOPE ID>##<TEXT>`です。   
-スコープを指定するIDが祖先要素のIDと一致する場合にのみ、スコープ化されたテキストが有効になります。
+ローカリゼーションは、グローバルな影響を防ぐためにスコープを限定したサポートを提供します。構文規則は以下の通りです：
+- `##<SCOPE ID>##<TEXT>` スコープが指定された要素の祖先のIDと一致する場合にのみ、スコープ付きのテキストが適用されます。
+- `##@<SELECTOR>##<TEXT>` スコープが指定されたCSSセレクタと一致する場合にのみ、スコープ付きのテキストが適用されます。
 
 ```json
   ...
-  "##tab_ti##Normal": "正常", // id="tab_ti"要素の下の`Normal`のみが`正常`として変換されます
-  "##tab_threedopenpose##Normal": "法線マップ", // id="tab_threedopenpose"要素の下の`Normal`のみが `法線マップ`として変換されます
+  "##tab_ti##Normal": "正常", // id="tab_ti"の要素の下にある`Normal`のみが`正常`に変換されます
+  "##tab_threedopenpose##Normal": "法線マップ", // id="tab_threedopenpose"の要素の下にある`Normal`のみが `法線マップ`に変換されます
+  "##@.extra-networks .tab-nav button##Lora": "Loraモデル", // class=".extra-networks .tab-nav button"の要素の下にある`Lora`のみが`Loraモデル`に変換されます
   ...
 ```
 
