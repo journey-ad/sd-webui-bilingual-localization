@@ -10,6 +10,9 @@
     
     .bilingual__trans_wrapper em {
       font-style: normal;
+      opacity: .4;
+      font-size: 10pt;
+      font-weight: normal;
     }
 
     #txtimg_hr_finalres .bilingual__trans_wrapper em,
@@ -40,8 +43,9 @@
     .posex_setting_cont .bilingual__trans_wrapper:not(.posex_bg .bilingual__trans_wrapper), /* Posex extension */
     #dynamic-prompting .bilingual__trans_wrapper
     {
-      font-size: 12px;
+      font-size: 12pt;
       align-items: flex-start;
+      line-height: 1.2em;
     }
 
     #extensions label .bilingual__trans_wrapper,
